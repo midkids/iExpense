@@ -229,6 +229,11 @@ struct ContentView: View {
 */
 
 // The actual iExpense project
+// - Building a list we can delete from
+// - Working with identifiable items in SwiftUI
+// - Sharing an observed object with a new view
+// - Making changes permanent with UserDefaults
+// - Final polish
 //
 // Making the struct conform to the protcol Identifiable
 // Lets SwiftUI know this data can be uniquely identifed
@@ -242,6 +247,10 @@ struct ExpenseItem: Identifiable {
     let amount: Double
 }
 
+// Clases the use the observable protocol,
+//  can be used in more than one SwiftUI view
+//  and all of those views will be updated
+//  when the relevant properties of the object changes
 @Observable
 class Expenses {
     var items = [ExpenseItem]()
@@ -252,6 +261,8 @@ struct ContentView: View {
     //   It is the @Observable macro that notice changes
     //   and notifies SwiftUI views to update themselves
     @State private var expenses = Expenses()
+    
+    @State private var showingAddExpense = false
     var body: some View {
         NavigationStack {
             // This is a dynamic list. SwiftUI needs to know
@@ -287,9 +298,23 @@ struct ContentView: View {
             // Add expenses
             .toolbar {
                 Button("Add Expense", systemImage: "plus") {
-                    let expense = ExpenseItem(name: "Test", type: "Personal", amount: 5.0)
-                    expenses.items.append(expense)
+                    // For testing UI only
+                    // let expense = ExpenseItem(name: "Test", type: "Personal", amount: 5.0)
+                    // expenses.items.append(expense)
+                    
+                    // showAddExpense is bound to our sheet
+                    // so SwiftUI will show the AddView
+                    // when it is true
+                    showingAddExpense = true
                 }
+            }
+            .sheet(isPresented: $showingAddExpense) {
+                // Here we are sharing the expenses object
+                // from the ContentView with the AddView
+                // IMPORTANT: Both views will share the same
+                // observable class
+                // RESULT: both view will watch for changes
+                AddView(expenses: expenses)
             }
         }
     }
