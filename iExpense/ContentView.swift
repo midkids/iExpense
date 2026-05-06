@@ -102,7 +102,7 @@ struct ContentView: View {
         }
     }
 }
- */
+*/
 
 /*
 // Deleting items using onDelete()
@@ -140,6 +140,9 @@ struct ContentView: View {
 }
  */
 
+/*
+// Storing user settings with UserDefaults
+//
 // The simplest way to read and write a small of data
 // is through user defaults
 // It is a great way to keep user preferences
@@ -184,7 +187,117 @@ struct ContentView: View {
         }
     }
 }
+*/
 
+// Archiving Swift objects with Codable
+//
+// For complex data types such as
+//   custom Swift types
+// Here we have simple text, but could also have
+//   other simple types (e.g. integers, booleans, doubles,
+//   arrays, and dictionaries)
+// IMPORTANT: use protocol Codable
+//   which is responsible for archiving and unarchiving data
+//   that means it can convert objects like this one
+//   into plain text and back again
+// NEW TYPE: JSON - JavaScript Object Notation
+// is the most common type used with Codable
+struct User: Codable {
+    let firstName: String
+    let lastName: String
+}
+
+/*
+struct ContentView: View {
+    @State private var user = User(firstName: "Taylor", lastName: "Swift")
+    var body: some View {
+        Button("Save User") {
+            // The value of the data variable
+            // is encoded in type Data
+            // that can hold any type of data
+            // object -> JSON binary data format type Data
+            // To do JSON -> object, we would use JSONDecoder
+            let encoder = JSONEncoder()
+            if let data = try? encoder.encode(user) {
+                
+                UserDefaults.standard.set(data, forKey: "UserData")
+            }
+        }
+      
+    }
+}
+*/
+
+// The actual iExpense project
+//
+// Making the struct conform to the protcol Identifiable
+// Lets SwiftUI know this data can be uniquely identifed
+// Identifiable requires a property named id that makes
+// the struct unique
+struct ExpenseItem: Identifiable {
+    // this will make a unique id for every entry in the array
+    let id = UUID()
+    let name: String
+    let type: String
+    let amount: Double
+}
+
+@Observable
+class Expenses {
+    var items = [ExpenseItem]()
+}
+
+struct ContentView: View {
+    // Using @State here is just to keep the object alive
+    //   It is the @Observable macro that notice changes
+    //   and notifies SwiftUI views to update themselves
+    @State private var expenses = Expenses()
+    var body: some View {
+        NavigationStack {
+            // This is a dynamic list. SwiftUI needs to know
+            // how to identify each single view
+            // inside there uniquely
+            // so it can tell what view has changed
+            // when the data changes
+            List {
+                // Could cause problems if name is not unique
+                // It works in this case because we are deleting
+                // a single specific row, one at a time
+                // But many other cases, that extra information
+                // will not be present causing our app to
+                // behave strangely
+                // ForEach(expenses.items, id: \.name) {item in
+                
+                // Here is the fix because id will always
+                // be unique
+                // ForEach(expenses.items, id: \.id) {item in
+                
+                // After adding Identifiable protocol
+                // to the ExpenseItem struct,
+                // we no longer need to have an id in
+                // our ForEach
+                ForEach(expenses.items) {item in
+                    Text(item.name)
+                }
+                // must use ForEach to enable onDelete
+                // allows swipe left to delete an item
+                .onDelete(perform: removeItems)
+            }
+            .navigationTitle("iExpense")
+            // Add expenses
+            .toolbar {
+                Button("Add Expense", systemImage: "plus") {
+                    let expense = ExpenseItem(name: "Test", type: "Personal", amount: 5.0)
+                    expenses.items.append(expense)
+                }
+            }
+        }
+    }
+    
+    func removeItems(at offsets: IndexSet) {
+        expenses.items.remove(atOffsets: offsets)
+    }
+}
 
 #Preview {
     ContentView()
