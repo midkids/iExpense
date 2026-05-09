@@ -202,6 +202,7 @@ struct ContentView: View {
 //   into plain text and back again
 // NEW TYPE: JSON - JavaScript Object Notation
 // is the most common type used with Codable
+// Our expense items are ready to be stored
 struct User: Codable {
     let firstName: String
     let lastName: String
@@ -239,9 +240,15 @@ struct ContentView: View {
 // Lets SwiftUI know this data can be uniquely identifed
 // Identifiable requires a property named id that makes
 // the struct unique
-struct ExpenseItem: Identifiable {
-    // this will make a unique id for every entry in the array
-    let id = UUID()
+struct ExpenseItem: Identifiable, Codable {
+    // This will make a unique id for every entry in the array
+    // Had to make id a var to get rid of warning
+    // saying it will not be decoded because it has
+    // an initial value which is not overwritable by codable
+    // However, this is actually the behavior we want
+    // SwiftUI is just trying to be helpful in case
+    // you did want to make this oject work with JSON
+    var id = UUID()
     let name: String
     let type: String
     let amount: Double
@@ -253,13 +260,47 @@ struct ExpenseItem: Identifiable {
 //  when the relevant properties of the object changes
 @Observable
 class Expenses {
-    var items = [ExpenseItem]()
+    var items = [ExpenseItem]() {
+        didSet {
+            // To correctly save our items correctly:
+            // 1) make a JSON encoder
+            // 2) encode the items variable
+            // IMPORTANT: this encoder can only be used
+            //   to encode objects that conform to the
+            //   Codeable protocol
+            if let encoded = try? JSONEncoder().encode(items) {
+                UserDefaults.standard.set(encoded, forKey: "Items")
+            }
+        }
+    }
+    init() {
+        // To correctly load our items correctly:
+        // 1) check to see if UserDefaults is there for key "Items"
+        // 2) try to decode the UserDefaults data if it is there
+        //    into an array of ExpenseItems
+        //    The .self is needed because SwiftUI needs to know
+        //    we are referring to the type ExpenseItem itself
+        //    That is, give me an array of ExpenseItems as a type
+        // 3) store the loaded data into items property of
+        //    the Expenses class
+        if let savedItems = UserDefaults.standard.data(forKey: "Items") {
+            if let decodedItems = try? JSONDecoder().decode([ExpenseItem].self, from: savedItems) {
+                items = decodedItems
+                return
+            }
+        }
+        // If either of the two actions fail
+        // make items an empty array
+        items = []
+    }
 }
 
 struct ContentView: View {
     // Using @State here is just to keep the object alive
     //   It is the @Observable macro that notice changes
     //   and notifies SwiftUI views to update themselves
+    // IMPORTANT: Both the ContentView and the AddView
+    //   will share the same list of expense items
     @State private var expenses = Expenses()
     
     @State private var showingAddExpense = false

@@ -20,6 +20,8 @@ struct AddView: View {
     // observable class
     // (made observable in ContentView)
     // RESULT: both view will watch for changes
+    // IMPORTANT: Both the ContentView and the AddView
+    //   will share the same list of expense items
     var expenses: Expenses
     
     let types = ["Personal", "Business"]
@@ -38,6 +40,12 @@ struct AddView: View {
                     .keyboardType(.decimalPad)
             }
             .navigationTitle("Add new expense")
+            .toolbar {
+                Button("Save") {
+                    let item = ExpenseItem(name: name, type: type, amount: amount)
+                    expenses.items.append(item)
+                }
+            }
         }
     }
 }
