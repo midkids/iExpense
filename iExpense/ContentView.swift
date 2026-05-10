@@ -305,6 +305,7 @@ struct ContentView: View {
     @State private var expenses = Expenses()
     
     @State private var showingAddExpense = false
+    
     var body: some View {
         NavigationStack {
             // This is a dynamic list. SwiftUI needs to know
@@ -330,12 +331,17 @@ struct ContentView: View {
                 // we no longer need to have an id in
                 // our ForEach
                 ForEach(expenses.items) {item in
+                    // Very common layout
+                    // Title and subtitle on left
+                    // More information on right
                     HStack {
                         VStack(alignment: .leading) {
                             Text(item.name)
                                 .font(.headline)
                             Text(item.type)
                         }
+                        // Spacer below VStack
+                        // Pushes the rest of the view to the right
                         Spacer()
                         Text(item.amount, format: .currency(code: "USD"))
                     }
@@ -358,6 +364,9 @@ struct ContentView: View {
                     showingAddExpense = true
                 }
             }
+            // Links the parameter isPresented variable
+            //    showingAddExpense to the environment
+            // We will use this feature in the AddView view
             .sheet(isPresented: $showingAddExpense) {
                 // Here we are sharing the expenses object
                 // from the ContentView with the AddView

@@ -8,6 +8,18 @@
 import SwiftUI
 
 struct AddView: View {
+    // Reads the dismiss value from the environment
+    // Need this statement to dismiss add expense
+    // screen when the time is right
+    // It controls the views environment
+    // The isPresented parameter,
+    //   which references the showingAddExpense variable
+    //   is linked to the environment
+    //   and is automatically turned to false
+    //   when the AdView view is dismissed
+    // IMPORTANT: We do not have to specify type
+    // It will call the dismiss function
+    //   to dismiss the AddView view
     @Environment(\.dismiss) var dismiss
     
     @State private var name = ""
@@ -45,6 +57,7 @@ struct AddView: View {
                 Button("Save") {
                     let item = ExpenseItem(name: name, type: type, amount: amount)
                     expenses.items.append(item)
+                    // dismisses this sheet
                     dismiss()
                 }
             }
