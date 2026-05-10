@@ -267,16 +267,17 @@ class Expenses {
             // 2) encode the items variable
             // IMPORTANT: this encoder can only be used
             //   to encode objects that conform to the
-            //   Codeable protocol
+            //   Codeable protocol - added Codeable to ExpenseItem struct
             if let encoded = try? JSONEncoder().encode(items) {
                 UserDefaults.standard.set(encoded, forKey: "Items")
             }
         }
     }
+    // custom initializer
     init() {
-        // To correctly load our items correctly:
+        // To load our items correctly:
         // 1) check to see if UserDefaults is there for key "Items"
-        // 2) try to decode the UserDefaults data if it is there
+        // 2) if it is there, try to decode the UserDefaults data
         //    into an array of ExpenseItems
         //    The .self is needed because SwiftUI needs to know
         //    we are referring to the type ExpenseItem itself
@@ -289,7 +290,7 @@ class Expenses {
                 return
             }
         }
-        // If either of the two actions fail
+        // If either of the two actions above fail
         // make items an empty array
         items = []
     }
@@ -329,7 +330,15 @@ struct ContentView: View {
                 // we no longer need to have an id in
                 // our ForEach
                 ForEach(expenses.items) {item in
-                    Text(item.name)
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text(item.name)
+                                .font(.headline)
+                            Text(item.type)
+                        }
+                        Spacer()
+                        Text(item.amount, format: .currency(code: "USD"))
+                    }
                 }
                 // must use ForEach to enable onDelete
                 // allows swipe left to delete an item
