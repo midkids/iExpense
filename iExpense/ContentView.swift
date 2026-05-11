@@ -128,6 +128,8 @@ struct ContentView: View {
                 }
             }
             // Allows deletion of muliple rows
+            // EditButton will automatically switch
+            //   between Edit and Done when tapped
             .toolbar {
                 EditButton()
             }
@@ -143,12 +145,17 @@ struct ContentView: View {
 /*
 // Storing user settings with UserDefaults
 //
+// UserDefaults can store integers, strings, Booleans, and more
 // The simplest way to read and write a small of data
 // is through user defaults
 // It is a great way to keep user preferences
 // Storing too many user defaults will slow the
 // loading of your app
 // Should store no more than 512 KB
+// Their values are automatically loaded when our app starts
+//   so try not to save too much
+// Should store no more than 512 KB
+// IMPORTANT: UserDefaults uses strings for its key names.
 
 struct ContentView: View {
     
@@ -240,6 +247,13 @@ struct ContentView: View {
 // Lets SwiftUI know this data can be uniquely identifed
 // Identifiable requires a property named id that makes
 // the struct unique
+// IMPORTANT: the JSON encoder can only be used
+//   to encode objects that conform to the
+//   Codeable protocol - added Codeable to ExpenseItem struct
+// If we add Codable conformance to a type,
+//   Swift can generate archiving and unarchiving code for us.
+// This only works if all the properties inside the type also conform to Codable
+// UUID already conforms to Codable
 struct ExpenseItem: Identifiable, Codable {
     // This will make a unique id for every entry in the array
     // Had to make id a var to get rid of warning
@@ -343,10 +357,11 @@ struct ContentView: View {
                         // Spacer below VStack
                         // Pushes the rest of the view to the right
                         Spacer()
-                        Text(item.amount, format: .currency(code: "USD"))
+                        Text(item.amount, format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                            .foregroundStyle(item.amount <= 10 ? .green : (item.amount >= 11 && item.amount <= 99 ? .yellow : .red))
                     }
                 }
-                // must use ForEach to enable onDelete
+                // The onDelete modifier exists only on ForEach
                 // allows swipe left to delete an item
                 .onDelete(perform: removeItems)
             }
@@ -364,6 +379,7 @@ struct ContentView: View {
                     showingAddExpense = true
                 }
             }
+            // SwiftUI lets us present new views using sheets
             // Links the parameter isPresented variable
             //    showingAddExpense to the environment
             // We will use this feature in the AddView view
@@ -378,6 +394,9 @@ struct ContentView: View {
         }
     }
     
+    // IndexSet is a sorted set of integers
+    // It is used for deleting views from a ForEach view
+    //   amongst other things
     func removeItems(at offsets: IndexSet) {
         expenses.items.remove(atOffsets: offsets)
     }
@@ -386,3 +405,4 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
+
