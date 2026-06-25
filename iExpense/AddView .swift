@@ -8,6 +8,16 @@
 import SwiftUI
 
 struct AddView: View {
+    
+    // IMPORTANT: This app was changed for
+    // Challenge #1 in Project 9, Day 4
+    // This is the Navigation App project
+    // Changes were made to use NavigationLink
+    // rather that a sheet to show the AddView
+    // The original code was saved in a project
+    // named iExpenseOriginal
+    
+    
     // Reads the dismiss value from the environment
     // Need this statement to dismiss add expense
     // screen when the time is right
@@ -41,28 +51,37 @@ struct AddView: View {
     
     
     var body: some View {
-        NavigationStack {
-            Form {
-                TextField("Name", text: $name)
-                Picker("Type", selection: $type) {
-                    ForEach(types, id: \.self) {
-                        Text($0)
-                    }
+        Form {
+            TextField("Name", text: $name)
+            Picker("Type", selection: $type) {
+                ForEach(types, id: \.self) {
+                    Text($0)
                 }
-                TextField("Amount", value: $amount,
-                          format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
-                    .keyboardType(.decimalPad)
             }
-            .navigationTitle("Add new expense")
-            .toolbar {
+            TextField("Amount", value: $amount,
+                      format: .currency(code: Locale.current.currency?.identifier ?? "USD"))
+                .keyboardType(.decimalPad)
+        }
+        .navigationTitle("Add new expense")
+        .toolbar {
+            // Added tool bar items to allow
+            // save or cancel
+            ToolbarItem(placement: .confirmationAction) {
                 Button("Save") {
                     let item = ExpenseItem(name: name, type: type, amount: amount)
                     expenses.items.append(item)
-                    // dismisses this sheet
+                    // Returns to the expense list after saving.
+                    dismiss()
+                }
+            }
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") {
                     dismiss()
                 }
             }
         }
+        // Hid back button to force user to make a choice
+        .navigationBarBackButtonHidden()
     }
 }
 

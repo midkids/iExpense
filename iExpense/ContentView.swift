@@ -7,6 +7,15 @@
 
 import SwiftUI
 
+// IMPORTANT: This app was changed for
+// Challenge #1 in Project 9, Day 4
+// This is the Navigation App project
+// Changes were made to use NavigationLink
+// rather that a sheet to show the AddView
+// The original code was saved in a project
+// named iExpenseOriginal
+
+
 // This one object contains all our data
 // Recall: 1) Structs are always owned by one unique thing
 //   whereas Classes can have multiple owners
@@ -312,13 +321,11 @@ class Expenses {
 
 struct ContentView: View {
     // Using @State here is just to keep the object alive
-    //   It is the @Observable macro that notice changes
+    //   It is the @Observable macro that notices changes
     //   and notifies SwiftUI views to update themselves
     // IMPORTANT: Both the ContentView and the AddView
     //   will share the same list of expense items
     @State private var expenses = Expenses()
-    
-    @State private var showingAddExpense = false
     
     var body: some View {
         NavigationStack {
@@ -366,30 +373,18 @@ struct ContentView: View {
                 .onDelete(perform: removeItems)
             }
             .navigationTitle("iExpense")
-            // Add expenses
+            // Add expenses by navigating to the AddView.
             .toolbar {
-                Button("Add Expense", systemImage: "plus") {
-                    // For testing UI only
-                    // let expense = ExpenseItem(name: "Test", type: "Personal", amount: 5.0)
-                    // expenses.items.append(expense)
-                    
-                    // showAddExpense is bound to our sheet
-                    // so SwiftUI will show the AddView
-                    // when it is true
-                    showingAddExpense = true
+                NavigationLink {
+                    // Here we are sharing the expenses object
+                    // from the ContentView with the AddView
+                    // IMPORTANT: Both views will share the same
+                    // observable class
+                    // RESULT: both view will watch for changes
+                    AddView(expenses: expenses)
+                } label: {
+                    Label("Add Expense", systemImage: "plus")
                 }
-            }
-            // SwiftUI lets us present new views using sheets
-            // Links the parameter isPresented variable
-            //    showingAddExpense to the environment
-            // We will use this feature in the AddView view
-            .sheet(isPresented: $showingAddExpense) {
-                // Here we are sharing the expenses object
-                // from the ContentView with the AddView
-                // IMPORTANT: Both views will share the same
-                // observable class
-                // RESULT: both view will watch for changes
-                AddView(expenses: expenses)
             }
         }
     }
